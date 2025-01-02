@@ -7,12 +7,24 @@
 
 import SwiftUI
 
-struct FavoritosView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
-}
 
-#Preview {
-    FavoritosView()
+
+struct FavoritosView: View {
+    @Binding var favoritos: [IdentifiableImage] // Array de imágenes favoritas
+
+    var body: some View {
+        ScrollView {
+            LazyVStack {
+                ForEach(favoritos) { imagen in
+                    Image(uiImage: imagen.image)
+                        .resizable()
+                        .scaledToFit()
+                        .cornerRadius(13)
+                        .padding()
+                }
+            }
+        }
+        .navigationTitle("Favoritos")
+        .navigationBarTitleDisplayMode(.inline)
+    }
 }
