@@ -8,26 +8,19 @@
 
 
 import SwiftUI
-
-
-// Estructura para hacer las imágenes identificables
-struct IdentifiableImage: Identifiable {
-    let id = UUID() // Generar un identificador único
-    let image: UIImage
-    var isFavorite: Bool = false // Estado para marcar si la imagen es favorita
-}
+import SwiftData
 
 struct HomeView: View {
+    @ObservedObject var viewModel: DalleViewModel
     @State private var texto: String = ""
-    @State private var imagenes: [IdentifiableImage] = []
     @State private var cargador: Bool = false
     @State private var mostrandoAlerta = false
-    @ObservedObject var viewModel: DalleViewModel // Usa el modelo compartido
-    
+    @Query private var imagenes: [ImageModel]
+    @Environment(\.modelContext) private var modelContext
+
     var body: some View {
         NavigationStack {
             VStack {
-                // Lista de imágenes generadas
                 ScrollView {
                     LazyVStack {
                         ForEach(imagenes) { imagen in
@@ -37,7 +30,7 @@ struct HomeView: View {
                                     .scaledToFit()
                                     .cornerRadius(13)
                                     .padding()
-                                
+
                                 HStack {
                                     Button(action: {
                                         guardarImagen(imagen: imagen.image)
@@ -49,7 +42,7 @@ struct HomeView: View {
                                         .foregroundColor(.blue)
                                     }
                                     .padding(.bottom, 10)
-                                    
+
                                     Button(action: {
                                         marcarComoFavorito(imagen: imagen)
                                     }) {
@@ -65,15 +58,14 @@ struct HomeView: View {
                         }
                     }
                 }
-                
+
                 Divider()
-                
-                // Campo de texto para descripción
+
                 HStack {
                     TextField("Describe la imagen...", text: $texto)
                         .textFieldStyle(.roundedBorder)
                         .padding()
-                    
+
                     if cargador {
                         ProgressView().padding()
                     } else {
@@ -88,7 +80,7 @@ struct HomeView: View {
                 }
                 .padding(.bottom)
             }
-            .navigationBarHidden(true) // Oculta la barra de navegación y el título
+            .navigationBarHidden(true)
             .alert(isPresented: $mostrandoAlerta) {
                 Alert(
                     title: Text("Imagen guardada"),
@@ -98,20 +90,16 @@ struct HomeView: View {
             }
         }
     }
-    
+
+    // Función para generar una imagen
     func generarImagen() {
         guard !texto.isEmpty else { return }
         cargador = true
         Task {
             do {
-                let response = try await viewModel.generarImagen(texto: texto)
-                if let url = response.data.map(\.url).first {
-                    let (data, _) = try await URLSession.shared.data(from: url)
-                    if let imagen = UIImage(data: data) {
-                        let nuevaImagen = IdentifiableImage(image: imagen)
-                        imagenes.insert(nuevaImagen, at: 0)
-                    }
-                }
+                let nuevaImagen = try await viewModel.generarImagen(texto: texto)
+                modelContext.insert(nuevaImagen)
+                try? modelContext.save()
                 cargador = false
             } catch {
                 print("Error generando imagen: \(error)")
@@ -119,24 +107,19 @@ struct HomeView: View {
             }
         }
     }
-    
+
+    // Función para guardar una imagen en la galería
     func guardarImagen(imagen: UIImage) {
         UIImageWriteToSavedPhotosAlbum(imagen, nil, nil, nil)
         mostrandoAlerta = true
     }
-    
-    func marcarComoFavorito(imagen: IdentifiableImage) {
-        if let index = imagenes.firstIndex(where: { $0.id == imagen.id }) {
-            imagenes[index].isFavorite.toggle()
-            if imagenes[index].isFavorite {
-                viewModel.favoritos.append(imagenes[index])
-            } else {
-                viewModel.favoritos.removeAll { $0.id == imagen.id }
-            }
-        }
+
+    // Función para marcar o desmarcar una imagen como favorita
+    func marcarComoFavorito(imagen: ImageModel) {
+        imagen.isFavorite.toggle()
+        try? modelContext.save()
     }
 }
-
 
 
 
