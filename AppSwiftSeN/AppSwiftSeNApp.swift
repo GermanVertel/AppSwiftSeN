@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct AppSwiftSeNApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .modelContainer(for: ImageModel.self) // Configura el contenedor de SwiftData
         }
     }
 }
