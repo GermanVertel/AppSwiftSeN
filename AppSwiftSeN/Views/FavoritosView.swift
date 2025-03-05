@@ -24,7 +24,7 @@ struct FavoritosView: View {
                             .font(.system(size: 60))
                             .foregroundColor(.gray)
                         
-                        Text("No hay favoritos")
+                        Text("No hay favoritos.")
                             .font(.title3)
                             .fontWeight(.medium)
                             .foregroundColor(.gray)
