@@ -20,71 +20,91 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack(spacing: 0) {
+                // Barra superior personalizada
+                HStack {
+                    Text("Generador IA")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.primary)
+                    Spacer()
+                }
+                .padding()
+                .background(Color(.systemBackground))
+                
+                // Área de imágenes generadas
                 ScrollView {
-                    LazyVStack {
+                    LazyVStack(spacing: 16) {
                         ForEach(imagenes) { imagen in
-                            VStack {
+                            VStack(spacing: 8) {
                                 Image(uiImage: imagen.image)
                                     .resizable()
                                     .scaledToFit()
-                                    .cornerRadius(13)
-                                    .padding()
-
-                                HStack {
-                                    Button(action: {
-                                        guardarImagen(imagen: imagen.image)
-                                    }) {
-                                        HStack {
-                                            Image(systemName: "square.and.arrow.down")
-                                            Text("Descargar")
-                                        }
-                                        .foregroundColor(.blue)
-                                    }
-                                    .padding(.bottom, 10)
-
-                                    Button(action: {
-                                        marcarComoFavorito(imagen: imagen)
-                                    }) {
-                                        HStack {
-                                            Image(systemName: imagen.isFavorite ? "heart.fill" : "heart")
-                                            Text(imagen.isFavorite ? "Favorito" : "Marcar como Favorito")
-                                        }
-                                        .foregroundColor(.red)
-                                    }
-                                    .padding(.bottom, 10)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .shadow(radius: 5)
+                                    .padding(.horizontal)
+                                
+                                // Botones de acción
+                                HStack(spacing: 20) {
+                                    ActionButton(
+                                        action: { marcarComoFavorito(imagen: imagen) },
+                                        icon: imagen.isFavorite ? "heart.fill" : "heart",
+                                        color: .red
+                                    )
+                                    
+                                    ActionButton(
+                                        action: { compartirImagen(imagen: imagen.image) },
+                                        icon: "square.and.arrow.up",
+                                        color: .green
+                                    )
                                 }
+                                .padding(.bottom, 8)
+                            }
+                            .background(Color(.systemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .shadow(color: .gray.opacity(0.2), radius: 8)
+                            .padding(.horizontal)
+                        }
+                    }
+                    .padding(.vertical)
+                }
+                .background(Color(.systemGray6))
+                
+                // Barra inferior de entrada
+                VStack(spacing: 0) {
+                    Divider()
+                    HStack(spacing: 12) {
+                        // Campo de texto mejorado
+                        TextField("Describe tu imagen...", text: $texto)
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                        
+                        // Botón de generar
+                        Button(action: generarImagen) {
+                            if cargador {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            } else {
+                                Image(systemName: "wand.and.stars.inverse")
+                                    .font(.system(size: 20, weight: .semibold))
                             }
                         }
+                        .frame(width: 44, height: 44)
+                        .background(texto.isEmpty ? Color.gray : Color.blue)
+                        .foregroundColor(.white)
+                        .clipShape(Circle())
+                        .disabled(texto.isEmpty || cargador)
                     }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(Color(.systemBackground))
                 }
-
-                Divider()
-
-                HStack {
-                    TextField("Describe la imagen...", text: $texto)
-                        .textFieldStyle(.roundedBorder)
-                        .padding()
-
-                    if cargador {
-                        ProgressView().padding()
-                    } else {
-                        Button(action: generarImagen) {
-                            Image(systemName: "paperplane.fill")
-                                .foregroundColor(.blue)
-                                .font(.system(size: 25))
-                                .padding()
-                        }
-                        .buttonStyle(.borderless)
-                    }
-                }
-                .padding(.bottom)
             }
-            .navigationBarHidden(true)
             .alert(isPresented: $mostrandoAlerta) {
                 Alert(
-                    title: Text("Imagen guardada"),
-                    message: Text("La imagen se ha guardado correctamente en tu galería."),
+                    title: Text("¡Listo!"),
+                    message: Text("La imagen se ha guardado en tu galería"),
                     dismissButton: .default(Text("OK"))
                 )
             }
@@ -100,18 +120,17 @@ struct HomeView: View {
                 let nuevaImagen = try await viewModel.generarImagen(texto: texto)
                 modelContext.insert(nuevaImagen)
                 try? modelContext.save()
-                cargador = false
+                await MainActor.run {
+                    texto = "" // Limpiar el campo de texto
+                    cargador = false
+                }
             } catch {
                 print("Error generando imagen: \(error)")
-                cargador = false
+                await MainActor.run {
+                    cargador = false
+                }
             }
         }
-    }
-
-    // Función para guardar una imagen en la galería
-    func guardarImagen(imagen: UIImage) {
-        UIImageWriteToSavedPhotosAlbum(imagen, nil, nil, nil)
-        mostrandoAlerta = true
     }
 
     // Función para marcar o desmarcar una imagen como favorita
@@ -119,7 +138,39 @@ struct HomeView: View {
         imagen.isFavorite.toggle()
         try? modelContext.save()
     }
+
+    func compartirImagen(imagen: UIImage) {
+        let activityViewController = UIActivityViewController(
+            activityItems: [imagen],
+            applicationActivities: nil
+        )
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first,
+           let rootViewController = window.rootViewController {
+            rootViewController.present(activityViewController, animated: true)
+        }
+    }
 }
+
+// Componente reutilizable para botones de acción
+struct ActionButton: View {
+    let action: () -> Void
+    let icon: String
+    let color: Color
+    
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 20))
+                .frame(width: 44, height: 44)
+                .background(color.opacity(0.1))
+                .foregroundColor(color)
+                .clipShape(Circle())
+        }
+    }
+}
+
 
 
 
