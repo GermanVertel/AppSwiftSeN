@@ -125,7 +125,7 @@ struct HomeView: View {
                     cargador = false
                 }
             } catch {
-                print("Error generando imagen: \(error)")
+                print("Error generando la imagen: \(error)")
                 await MainActor.run {
                     cargador = false
                 }
