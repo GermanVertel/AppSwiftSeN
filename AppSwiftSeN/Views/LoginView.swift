@@ -71,7 +71,7 @@ struct LoginView: View {
                     
                     HStack {
                         Spacer()
-                        Button("Restablecer contraseña") {
+                        Button("Restablecer contraseña ") {
                             resetPassword()
                         }
                         .font(.footnote)
