@@ -30,8 +30,7 @@ struct AppSwiftSeNApp: App {
                 ContentView()
                     .environmentObject(login)
                     .modelContainer(for: ImageModel.self) // Configura el contenedor de SwiftData
-            }
-            
+            }            
         }
     }
 }

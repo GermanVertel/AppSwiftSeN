@@ -71,11 +71,11 @@ struct LoginView: View {
                     
                     HStack {
                         Spacer()
-                        Button("Restablecer contraseña ") {
-                            resetPassword()
+                        NavigationLink(destination: ResetPasswordView()) {
+                            Text("Restablecer contraseña ")
+                                .font(.footnote)
+                                .foregroundColor(.blue)
                         }
-                        .font(.footnote)
-                        .foregroundColor(.blue)
                     }
                 }
                 .padding(.horizontal)
@@ -165,15 +165,7 @@ struct LoginView: View {
     
     // Función para restablecer la contraseña
     private func resetPassword() {
-        Auth.auth().sendPasswordReset(withEmail: email) { error in
-            if let error = error {
-                errorMessage = "No se pudo enviar el correo de restablecimiento. Verifica tu dirección de correo electrónico."
-                print("Error al enviar el correo de restablecimiento: \(error.localizedDescription)")
-            } else {
-                errorMessage = "Se ha enviado un correo de restablecimiento a \(email)."
-                print("Correo de restablecimiento enviado exitosamente.")
-            }
-        }
+        // Esta función ya no es necesaria ya que ahora navegamos a ResetPasswordView
     }
     
     // Autenticación biométrica (Face ID)
