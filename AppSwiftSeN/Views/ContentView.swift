@@ -8,25 +8,20 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var viewModel = DalleViewModel()
-    @State private var selectedTab = 0
-
+    @EnvironmentObject var loginShow: FirebaseViewModel
+    
     var body: some View {
-        NavigationView {
-            TabView(selection: $selectedTab) {
-                HomeView(viewModel: viewModel)
-                    .tabItem {
-                        Label("Generador", systemImage: "photo")
-                    }
-                    .tag(0)
-
-                FavoritosView()
-                    .tabItem {
-                        Label("Favorito", systemImage: "heart.fill")
-                    }
-                    .tag(1)
+        Group {
+            if loginShow.isLogged {
+                MainTabView()
+            } else {
+                LoginView()
             }
-            .navigationBarHidden(true)
+        }
+        .onAppear {
+            if (UserDefaults.standard.object(forKey: "sesion")) != nil {
+                loginShow.isLogged = true
+            }
         }
     }
 }

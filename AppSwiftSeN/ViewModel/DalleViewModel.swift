@@ -30,6 +30,7 @@ class DalleViewModel: ObservableObject {
 
         let data: Data = try JSONSerialization.data(withJSONObject: parametros)
         let apikey = ""
+        
         var request = URLRequest(url: url)
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(apikey)", forHTTPHeaderField: "Authorization")

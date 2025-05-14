@@ -112,6 +112,7 @@ struct HomeView: View {
     }
 
     // Función para generar una imagen
+    
     func generarImagen() {
         guard !texto.isEmpty else { return }
         cargador = true

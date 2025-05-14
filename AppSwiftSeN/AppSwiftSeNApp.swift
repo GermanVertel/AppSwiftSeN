@@ -19,10 +19,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct AppSwiftSeNApp: App {
+    
+    // register app delegate for Firebase setup
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
     var body: some Scene {
+        let login = FirebaseViewModel()
         WindowGroup {
             NavigationView {
                 ContentView()
+                    .environmentObject(login)
                     .modelContainer(for: ImageModel.self) // Configura el contenedor de SwiftData
             }
             
