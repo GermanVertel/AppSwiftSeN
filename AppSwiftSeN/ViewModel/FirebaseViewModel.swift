@@ -44,11 +44,6 @@ class FirebaseViewModel: ObservableObject {
     
     // Función para iniciar sesión
     func login(email: String, password: String, completion: @escaping (_ done: Bool) -> Void) {
-        defer {
-            // Asegúrate de que el completion siempre se llame
-            completion(false)
-        }
-        
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
             if let user = result?.user {
                 print("User logged in: \(user.uid)")
@@ -56,8 +51,10 @@ class FirebaseViewModel: ObservableObject {
                 completion(true)
             } else if let error = error {
                 print("Error en Firebase: \(error.localizedDescription)")
+                completion(false)
             } else {
                 print("Error en la app")
+                completion(false)
             }
         }
     }
@@ -85,10 +82,11 @@ class FirebaseViewModel: ObservableObject {
                 completion(true)
             } else if let error = error {
                 print("Error en Firebase de registro: \(error.localizedDescription)")
+                completion(false)
             } else {
                 print("Error en la app")
+                completion(false)
             }
-            completion(false)
         }
     }
     
@@ -96,6 +94,17 @@ class FirebaseViewModel: ObservableObject {
     private func isPasswordValid(_ password: String) -> Bool {
         let passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"
         return NSPredicate(format: "SELF MATCHES %@", passwordRegex).evaluate(with: password)
+    }
+    
+    // Función para cerrar sesión
+    func cerrarSesion() {
+        do {
+            try Auth.auth().signOut()
+            self.isLogged = false
+            print("Sesión cerrada exitosamente")
+        } catch {
+            print("Error al cerrar sesión: \(error.localizedDescription)")
+        }
     }
 }
 

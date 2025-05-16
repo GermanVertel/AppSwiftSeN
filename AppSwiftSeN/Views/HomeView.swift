@@ -12,6 +12,7 @@ import SwiftData
 
 struct HomeView: View {
     @ObservedObject var viewModel: DalleViewModel
+    @EnvironmentObject var firebaseViewModel: FirebaseViewModel
     @State private var texto: String = ""
     @State private var cargador: Bool = false
     @State private var mostrandoAlerta = false
@@ -20,18 +21,35 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            VStack(spacing: 10) {
+                
                 // Barra superior personalizada
-                HStack {
+              
+               /* HStack {
                     Text("Generador IA")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.primary)
+                    
                     Spacer()
+                    
+                    Button(action: {
+                        firebaseViewModel.cerrarSesion()
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                            Text("Salir")
+                        }
+                        .foregroundColor(.red)
+                        .padding(8)
+                        .background(Color.red.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
                 }
                 .padding()
                 .background(Color(.systemBackground))
                 
+                */
                 // Área de imágenes generadas
                 ScrollView {
                     LazyVStack(spacing: 16) {
@@ -42,7 +60,7 @@ struct HomeView: View {
                                     .scaledToFit()
                                     .clipShape(RoundedRectangle(cornerRadius: 16))
                                     .shadow(radius: 5)
-                                    .padding(.horizontal)
+                                    .padding()
                                 
                                 // Botones de acción
                                 HStack(spacing: 20) {
@@ -59,16 +77,21 @@ struct HomeView: View {
                                     )
                                 }
                                 .padding(.bottom, 8)
+                                
                             }
                             .background(Color(.systemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 20))
                             .shadow(color: .gray.opacity(0.2), radius: 8)
                             .padding(.horizontal)
                         }
+                        
                     }
                     .padding(.vertical)
+                    
                 }
                 .background(Color(.systemGray6))
+                
+                
                 
                 // Barra inferior de entrada
                 VStack(spacing: 0) {
@@ -101,6 +124,14 @@ struct HomeView: View {
                     .background(Color(.systemBackground))
                 }
             }
+            .navigationTitle("Generador IA")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    MenuHamburguesaView()
+                }
+            }
             .alert(isPresented: $mostrandoAlerta) {
                 Alert(
                     title: Text("¡Listo!"),
@@ -110,6 +141,7 @@ struct HomeView: View {
             }
         }
     }
+    
 
     // Función para generar una imagen
     
