@@ -1,3 +1,12 @@
+
+# Xcode
+*.xcuserstate
+*.xcworkspace/
+!*.xcodeproj/project.pbxproj
+*.xcuserdatad/
 .DS_Store
+build/
+DerivedData/
 *.xcconfig
 Secrets.swift
+UserInterfaceState.xcuserstate
