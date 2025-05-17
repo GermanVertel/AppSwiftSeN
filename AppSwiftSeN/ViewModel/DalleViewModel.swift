@@ -29,7 +29,10 @@ class DalleViewModel: ObservableObject {
         ]
 
         let data: Data = try JSONSerialization.data(withJSONObject: parametros)
-        let apikey = ""
+        
+        let apikey = Secrets.openAIKey
+        
+      
         
         var request = URLRequest(url: url)
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")

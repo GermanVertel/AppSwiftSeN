@@ -23,33 +23,6 @@ struct HomeView: View {
         NavigationStack {
             VStack(spacing: 10) {
                 
-                // Barra superior personalizada
-              
-               /* HStack {
-                    Text("Generador IA")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.primary)
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        firebaseViewModel.cerrarSesion()
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
-                            Text("Salir")
-                        }
-                        .foregroundColor(.red)
-                        .padding(8)
-                        .background(Color.red.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                }
-                .padding()
-                .background(Color(.systemBackground))
-                
-                */
                 // Área de imágenes generadas
                 ScrollView {
                     LazyVStack(spacing: 16) {
@@ -124,7 +97,7 @@ struct HomeView: View {
                     .background(Color(.systemBackground))
                 }
             }
-            .navigationTitle("Generador IA")
+            .navigationTitle("Imaginea")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
