@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+
 <plist version="1.0">
 <dict>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.335463490718-07gbp7bgkh49irghjrkj4d6b332gv5ct</string>
-			</array>
-		</dict>
-	</array>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.googleusercontent.apps.335463490718-07gbp7bgkh49irghjrkj4d6b332gv5ct</string>
+            </array>
+        </dict>
+    </array>
+
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Queremos guardar imágenes generadas en tu galería de fotos.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Necesitamos acceder a tu galería para guardar imágenes generadas.</string>
 </dict>
 </plist>

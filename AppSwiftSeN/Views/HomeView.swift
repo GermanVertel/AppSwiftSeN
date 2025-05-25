@@ -9,6 +9,7 @@
 
 import SwiftUI
 import SwiftData
+import Photos
 
 struct HomeView: View {
     @ObservedObject var viewModel: DalleViewModel
@@ -47,6 +48,12 @@ struct HomeView: View {
                                         action: { compartirImagen(imagen: imagen.image) },
                                         icon: "square.and.arrow.up",
                                         color: .green
+                                    )
+
+                                    ActionButton(
+                                        action: { guardarImagenEnGaleria(imagen: imagen.image) },
+                                        icon: "arrow.down.to.line.alt",
+                                        color: .blue
                                     )
                                 }
                                 .padding(.bottom, 8)
@@ -156,6 +163,11 @@ struct HomeView: View {
            let rootViewController = window.rootViewController {
             rootViewController.present(activityViewController, animated: true)
         }
+    }
+
+    func guardarImagenEnGaleria(imagen: UIImage) {
+        UIImageWriteToSavedPhotosAlbum(imagen, nil, nil, nil)
+        mostrandoAlerta = true
     }
 }
 
