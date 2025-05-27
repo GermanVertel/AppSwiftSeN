@@ -19,6 +19,7 @@ struct HomeView: View {
     @State private var mostrandoAlerta = false
     @Query private var imagenes: [ImageModel]
     @Environment(\.modelContext) private var modelContext
+    @State private var imagenSeleccionada: UIImage? = nil
 
     var body: some View {
         NavigationStack {
@@ -35,6 +36,9 @@ struct HomeView: View {
                                     .clipShape(RoundedRectangle(cornerRadius: 16))
                                     .shadow(radius: 5)
                                     .padding()
+                                    .onTapGesture {
+                                        imagenSeleccionada = imagen.image
+                                    }
                                 
                                 // Botones de acción
                                 HStack(spacing: 20) {
@@ -54,6 +58,12 @@ struct HomeView: View {
                                         action: { guardarImagenEnGaleria(imagen: imagen.image) },
                                         icon: "arrow.down.to.line.alt",
                                         color: .blue
+                                    )
+
+                                    ActionButton(
+                                        action: { eliminarImagen(imagen: imagen) },
+                                        icon: "trash",
+                                        color: .gray
                                     )
                                 }
                                 .padding(.bottom, 8)
@@ -119,6 +129,16 @@ struct HomeView: View {
                     dismissButton: .default(Text("OK"))
                 )
             }
+            .sheet(isPresented: Binding<Bool>(
+                get: { imagenSeleccionada != nil },
+                set: { if !$0 { imagenSeleccionada = nil } }
+            )) {
+                if let imagen = imagenSeleccionada {
+                    FullScreenImageView(imagen: imagen) {
+                        imagenSeleccionada = nil
+                    }
+                }
+            }
         }
     }
     
@@ -169,6 +189,11 @@ struct HomeView: View {
         UIImageWriteToSavedPhotosAlbum(imagen, nil, nil, nil)
         mostrandoAlerta = true
     }
+
+    func eliminarImagen(imagen: ImageModel) {
+        modelContext.delete(imagen)
+        try? modelContext.save()
+    }
 }
 
 // Componente reutilizable para botones de acción
@@ -185,6 +210,28 @@ struct ActionButton: View {
                 .background(color.opacity(0.1))
                 .foregroundColor(color)
                 .clipShape(Circle())
+        }
+    }
+}
+
+struct FullScreenImageView: View {
+    let imagen: UIImage
+    let onClose: () -> Void
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Color.black.ignoresSafeArea()
+            Image(uiImage: imagen)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.black)
+            Button(action: onClose) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 32))
+                    .foregroundColor(.white)
+                    .padding()
+            }
         }
     }
 }

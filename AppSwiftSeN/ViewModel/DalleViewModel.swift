@@ -22,6 +22,7 @@ class DalleViewModel: ObservableObject {
         }
 
         let parametros: [String: Any] = [
+            "model": "dall-e-3",
             "prompt": texto,
             "n": 1,
             "size": "1024x1024",

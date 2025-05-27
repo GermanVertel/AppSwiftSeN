@@ -12,6 +12,8 @@ struct FavoritosView: View {
     @Query(filter: #Predicate<ImageModel> { $0.isFavorite }) private var favoritos: [ImageModel]
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var firebaseViewModel: FirebaseViewModel
+    @State private var imagenSeleccionada: ImageModel? = nil
+    @State private var mostrandoAlerta = false
     
     var body: some View {
         NavigationStack {
@@ -53,7 +55,9 @@ struct FavoritosView: View {
                                             .resizable()
                                             .scaledToFit()
                                             .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        
+                                            .onTapGesture {
+                                                imagenSeleccionada = imagen
+                                            }
                                         Button(action: { marcarComoNoFavorito(imagen: imagen) }) {
                                             Image(systemName: "heart.fill")
                                                 .foregroundColor(.red)
@@ -81,6 +85,39 @@ struct FavoritosView: View {
                     MenuHamburguesaView()
                 }
             }
+            .sheet(item: $imagenSeleccionada) { imagen in
+                FullScreenFavoritosImageView(
+                    imagen: imagen,
+                    onClose: { imagenSeleccionada = nil },
+                    onToggleFavorito: {
+                        marcarComoNoFavorito(imagen: imagen)
+                        imagenSeleccionada = nil
+                    },
+                    onCompartir: {
+                        imagenSeleccionada = nil
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            compartirImagen(imagen: imagen.image)
+                        }
+                    },
+                    onDescargar: {
+                        imagenSeleccionada = nil
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            guardarImagenEnGaleria(imagen: imagen.image)
+                        }
+                    },
+                    onEliminar: {
+                        eliminarImagen(imagen: imagen)
+                        imagenSeleccionada = nil
+                    }
+                )
+            }
+            .alert(isPresented: $mostrandoAlerta) {
+                Alert(
+                    title: Text("¡Listo!"),
+                    message: Text("La imagen se ha guardado en tu galería"),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
     }
     
@@ -88,6 +125,81 @@ struct FavoritosView: View {
         withAnimation {
             imagen.isFavorite = false
             try? modelContext.save()
+        }
+    }
+    
+    func compartirImagen(imagen: UIImage) {
+        let activityViewController = UIActivityViewController(
+            activityItems: [imagen],
+            applicationActivities: nil
+        )
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first,
+           let rootViewController = window.rootViewController {
+            rootViewController.present(activityViewController, animated: true)
+        }
+    }
+    
+    func guardarImagenEnGaleria(imagen: UIImage) {
+        UIImageWriteToSavedPhotosAlbum(imagen, nil, nil, nil)
+        mostrandoAlerta = true
+    }
+    
+    func eliminarImagen(imagen: ImageModel) {
+        modelContext.delete(imagen)
+        try? modelContext.save()
+    }
+}
+
+struct FullScreenFavoritosImageView: View {
+    let imagen: ImageModel
+    let onClose: () -> Void
+    let onToggleFavorito: () -> Void
+    let onCompartir: () -> Void
+    let onDescargar: () -> Void
+    let onEliminar: () -> Void
+    
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Color.black.ignoresSafeArea()
+            VStack {
+                Spacer()
+                Image(uiImage: imagen.image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.black)
+                Spacer()
+                HStack(spacing: 20) {
+                    ActionButton(
+                        action: onToggleFavorito,
+                        icon: "heart.slash",
+                        color: .red
+                    )
+                    ActionButton(
+                        action: onCompartir,
+                        icon: "square.and.arrow.up",
+                        color: .green
+                    )
+                    ActionButton(
+                        action: onDescargar,
+                        icon: "arrow.down.to.line.alt",
+                        color: .blue
+                    )
+                    ActionButton(
+                        action: onEliminar,
+                        icon: "trash",
+                        color: .gray
+                    )
+                }
+                .padding(.bottom, 32)
+            }
+            Button(action: onClose) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 32))
+                    .foregroundColor(.white)
+                    .padding()
+            }
         }
     }
 }
