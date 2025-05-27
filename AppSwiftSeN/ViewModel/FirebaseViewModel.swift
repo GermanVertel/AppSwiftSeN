@@ -9,6 +9,8 @@
 import Foundation
 import Firebase
 import FirebaseAuth
+import GoogleSignIn
+import FirebaseCore
 
 class FirebaseViewModel: ObservableObject {
     
@@ -58,6 +60,10 @@ class FirebaseViewModel: ObservableObject {
             }
         }
     }
+
+
+
+    
     
     // Función para registrar un usuario
     func createUser(name: String, email: String, password: String, confirPassword: String, completion: @escaping (_ done: Bool) -> Void) {
@@ -100,10 +106,52 @@ class FirebaseViewModel: ObservableObject {
     func cerrarSesion() {
         do {
             try Auth.auth().signOut()
-            self.isLogged = false
+            DispatchQueue.main.async {
+                self.isLogged = false
+                UserDefaults.standard.removeObject(forKey: "sesion")
+            }
             print("Sesión cerrada exitosamente")
         } catch {
             print("Error al cerrar sesión: \(error.localizedDescription)")
+        }
+    }
+
+    func signInWithGoogle(presenting: UIViewController, completion: @escaping (Bool) -> Void) {
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            completion(false)
+            return
+        }
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+
+        GIDSignIn.sharedInstance.signIn(withPresenting: presenting) { result, error in
+            if let error = error {
+                print("Error en Google Sign-In: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            guard let user = result?.user else {
+                completion(false)
+                return
+            }
+            guard let idToken = user.idToken?.tokenString else {
+                completion(false)
+                return
+            }
+            let accessToken = user.accessToken.tokenString
+
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
+            Auth.auth().signIn(with: credential) { authResult, error in
+                if let error = error {
+                    print("Error autenticando con Firebase: \(error.localizedDescription)")
+                    completion(false)
+                } else {
+                    DispatchQueue.main.async {
+                        self.isLogged = true
+                    }
+                    completion(true)
+                }
+            }
         }
     }
 }

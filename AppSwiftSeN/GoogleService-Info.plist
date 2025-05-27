@@ -30,7 +30,6 @@
 	<true/>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:335463490718:ios:02941be00e501ad1b9c78f</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>Esta app utiliza Face ID para autenticar tu identidad de forma segura.</string>
+	
 </dict>
 </plist>

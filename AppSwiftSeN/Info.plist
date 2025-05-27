@@ -19,5 +19,7 @@
     <string>Queremos guardar imágenes generadas en tu galería de fotos.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Necesitamos acceder a tu galería para guardar imágenes generadas.</string>
+    <key>NSFaceIDUsageDescription</key>
+    <string>Esta app utiliza Face ID para autenticar tu identidad de forma segura.</string>
 </dict>
 </plist>

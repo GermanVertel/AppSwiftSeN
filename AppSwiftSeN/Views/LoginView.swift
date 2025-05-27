@@ -9,6 +9,7 @@ import SwiftUI
 import Firebase
 import FirebaseAuth
 import LocalAuthentication
+import GoogleSignInSwift
 
 struct LoginView: View {
     @State private var email = ""
@@ -16,7 +17,6 @@ struct LoginView: View {
     @State private var rememberPassword: Bool = false
     @State private var navigateToRegister = false
     @State private var errorMessage: String = "" // Mensaje de error para mostrar al usuario
-    @StateObject var login = FirebaseViewModel()
     @EnvironmentObject var loginShow: FirebaseViewModel
     
     var body: some View {
@@ -96,10 +96,10 @@ struct LoginView: View {
                             return
                         }
                         
-                        login.login(email: email, password: pass) { done in
+                        loginShow.login(email: email, password: pass) { done in
                             if done {
                                 UserDefaults.standard.set(true, forKey: "sesion")
-                                loginShow.isLogged.toggle()
+                                loginShow.isLogged = true
                             } else {
                                 errorMessage = "Credenciales incorrectas. Por favor, inténtalo de nuevo."
                             }
@@ -130,10 +130,11 @@ struct LoginView: View {
                     }
                 }
                 .padding(.horizontal)
+             
                 
-                // Touch ID login
+                // inicio de sesion con faceID
                 VStack(spacing: 10) {
-                    Text("Inicio de sesion con Face ID")
+                    Text("Inicio con Face ID")
                         .font(.footnote)
                         .foregroundColor(.gray)
                     
@@ -143,10 +144,21 @@ struct LoginView: View {
                         Image(systemName: "faceid")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 39, height: 39)
                             .foregroundColor(.blue)
                     }
+                    
+                    
+                    
                 }
+
+                // Botón para iniciar sesión con Google
+                GoogleSignInButton {
+                    handleGoogleSignIn()
+                }
+                .frame(height: 50)
+                .padding(.horizontal)
+                
             }
             .padding()
         }
@@ -184,7 +196,7 @@ struct LoginView: View {
                         if success {
                             print("Autenticación con Face ID exitosa")
                             UserDefaults.standard.set(true, forKey: "sesion")
-                            loginShow.isLogged.toggle()
+                            loginShow.isLogged = true
                         } else {
                             errorMessage = "La autenticación con Face ID falló. Por favor, inténtalo de nuevo."
                             print("Error en la autenticación con Face ID: \(error?.localizedDescription ?? "Error desconocido")")
@@ -198,6 +210,22 @@ struct LoginView: View {
         } else {
             errorMessage = "Tu dispositivo no soporta Face ID."
             print("El dispositivo no soporta autenticación biométrica")
+        }
+    }
+
+// Función para iniciar sesión con Google 
+    private func handleGoogleSignIn() {
+        guard let rootViewController = UIApplication.shared.windows.first?.rootViewController else {
+            errorMessage = "No se pudo obtener el controlador principal."
+            return
+        }
+        loginShow.signInWithGoogle(presenting: rootViewController) { success in
+            if success {
+                UserDefaults.standard.set(true, forKey: "sesion")
+                loginShow.isLogged = true
+            } else {
+                errorMessage = "No se pudo iniciar sesión con Google."
+            }
         }
     }
 }
