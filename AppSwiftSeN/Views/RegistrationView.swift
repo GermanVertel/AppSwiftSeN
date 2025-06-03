@@ -15,10 +15,11 @@ struct RegistrationView: View {
         VStack(spacing: 20) {
             // Top illustration
             HStack(spacing: 20) {
-                Image("person2")
+                /*Image("logoImaginea")
                     .resizable()
                     .scaledToFit()
                     .frame(height: 200)
+                 */
             }
             
             // Title

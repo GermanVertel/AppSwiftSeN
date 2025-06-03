@@ -59,7 +59,8 @@ struct FavoritosView: View {
                                                 imagenSeleccionada = imagen
                                             }
                                         Button(action: { marcarComoNoFavorito(imagen: imagen) }) {
-                                            Image(systemName: "heart.fill")
+                                            
+                                              Image(systemName: "heart.fill")
                                                 .foregroundColor(.red)
                                                 .padding(8)
                                                 .background(Color.red.opacity(0.1))

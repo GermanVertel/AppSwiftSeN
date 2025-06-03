@@ -24,16 +24,17 @@ struct LoginView: View {
             VStack(spacing: 20) {
                 // Top illustration
                 HStack(spacing: 20) {
-                    Image("person2")
+                    Image("logoImaginea")
                         .resizable()
                         .scaledToFit()
                         .frame(height: 200)
                 }
                 
                 // Welcome text
-                Text("Bienvenido")
+                /*Text("Bienvenido")
                     .font(.title)
                     .fontWeight(.bold)
+                 */
                 
                 // Terms text
                 /*HStack {
@@ -134,6 +135,16 @@ struct LoginView: View {
                 
                 // inicio de sesion con faceID
                 VStack(spacing: 10) {
+                    
+                    
+                    // Botón para iniciar sesión con Google
+                    GoogleSignInButton {
+                        handleGoogleSignIn()
+                    }
+                    .frame(height: 50)
+                    .padding(.horizontal)
+                    
+                    
                     Text("Inicio con Face ID")
                         .font(.footnote)
                         .foregroundColor(.gray)
@@ -152,12 +163,7 @@ struct LoginView: View {
                     
                 }
 
-                // Botón para iniciar sesión con Google
-                GoogleSignInButton {
-                    handleGoogleSignIn()
-                }
-                .frame(height: 50)
-                .padding(.horizontal)
+                
                 
             }
             .padding()
